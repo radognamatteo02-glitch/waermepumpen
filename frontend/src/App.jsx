@@ -1,13 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import Navbar from './components/Navbar';
+import { Hero, ImageBanner, WarumWaermepumpe, Ablauf, Vergleich, Wissen } from './components/InfoSections';
+import Faq from './components/Faq';
+import Footer from './components/Footer';
 import './index.css';
 
 function App() {
-  // --- State Management ---
-  const [isNavScrolled, setIsNavScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeFaq, setActiveFaq] = useState(null);
-
-  // Rechner State
+  // --- Rechner State ---
   const [step, setStep] = useState(1);
   const [calcState, setCalcState] = useState({
     wohnflaeche: 150,
@@ -24,13 +23,6 @@ function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [results, setResults] = useState(null);
 
-  // --- Effects ---
-  useEffect(() => {
-    const handleScroll = () => setIsNavScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   // --- Hilfsfunktionen ---
   const fmt = (n) => new Intl.NumberFormat('de-DE').format(n);
 
@@ -43,7 +35,7 @@ function App() {
     return `linear-gradient(to right, #234034 ${percentage}%, #DCD4C4 ${percentage}%)`;
   };
 
-  // --- Rechner Logik ---
+  // --- Rechner Berechnungslogik ---
   const showResult = () => {
     let sparQuote = 0.34;
     if (calcState.heizungsart === 'oel') sparQuote += 0.08;
@@ -98,7 +90,7 @@ function App() {
     setIsSubmitting(false);
   };
 
-  // Validierung
+  // Validierung für Buttons
   const isStep1Valid = calcState.daemmstandard !== null;
   const isStep2Valid = calcState.heizungsart !== null;
   const isStep3Valid = calcState.heizverteilung !== null;
@@ -106,62 +98,56 @@ function App() {
 
   return (
     <>
-      <header>
-        <div className="top-bar">
-          {/* ... Top Bar HTML in JSX (Klassen in className, style={{...}}) ... */}
-        </div>
-        <nav id="main-nav" className={isNavScrolled ? 'scrolled' : ''}>
-          <div className="nav-content">
-            <div className="nav-brand" onClick={() => window.scrollTo(0, 0)}>
-              Wärmekompass
-            </div>
-            <div className="nav-links hide-mobile">
-              <a href="#rechner">Rechner</a>
-              <a href="#so-funktioniert-es">Ablauf</a>
-            </div>
-            <div className="nav-actions">
-              <a href="#rechner" className="btn-primary">Kostenlos berechnen</a>
-              <button id="mobile-menu-btn" className="show-mobile-flex" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-                Menu
-              </button>
-            </div>
-          </div>
-          {isMobileMenuOpen && (
-            <div id="mobile-menu" onClick={() => setIsMobileMenuOpen(false)}>
-              <a href="#rechner">Rechner</a>
-              <a href="#so-funktioniert-es">Ablauf</a>
-            </div>
-          )}
-        </nav>
-      </header>
+      <Navbar />
+      <Hero />
+      <ImageBanner />
+      <WarumWaermepumpe />
 
-      <section id="hero" className="bg-light">
-        <div className="container hero-container">
-          <div className="eyebrow">Wärmepumpen-Beratung</div>
-          <h1>Lohnt sich eine Wärmepumpe für <em>Ihr</em> Zuhause?</h1>
-        </div>
-      </section>
-
-      {/* --- RECHNER --- */}
+      {/* --- RECHNER KOMPONENTE --- */}
       <section id="rechner" className="bg-sand">
         <div className="container-sm">
+          <div className="section-header text-center">
+            <div className="eyebrow">Der Rechner</div>
+            <h2>Eine erste <em>Orientierung</em> in vier Schritten</h2>
+          </div>
+
           <div className="calculator-card">
-            
             <div className="progress-bar-container">
               <div className="progress-bar" style={{ width: typeof step === 'number' ? `${step * 25}%` : '100%' }}></div>
             </div>
-
+            
+            <div className="card-header">
+              <span className="step-label">
+                {step === 1 ? 'Schritt 1 von 4 · Gebäude' : 
+                 step === 2 ? 'Schritt 2 von 4 · Heizung' : 
+                 step === 3 ? 'Schritt 3 von 4 · Heizverteilung' : 
+                 step === 4 ? 'Schritt 4 von 4 · Strompreis' : 
+                 step === 'result' ? 'Ihr Ergebnis' : 
+                 step === 'contact' ? 'Kontakt' : 'Gesendet'}
+              </span>
+            </div>
+            
             <div className="card-body">
               {/* SCHRITT 1 */}
               {step === 1 && (
                 <div className="calc-step">
                   <h3>Ihr Gebäude</h3>
+                  <p className="step-desc">Diese Angaben bestimmen, wie viel Wärme Ihr Haus benötigt.</p>
                   
                   <div className="input-group">
                     <div className="flex-between"><label>Wohnfläche</label><span className="val-display">{calcState.wohnflaeche} m²</span></div>
                     <input type="range" min="50" max="400" value={calcState.wohnflaeche} className="slider" 
                            onChange={(e) => handleSliderChange('wohnflaeche', e.target.value)}
                            style={{ background: getSliderBackground(calcState.wohnflaeche, 50, 400) }} />
+                    <div className="slider-labels"><span>50 m²</span><span>400 m²</span></div>
+                  </div>
+
+                  <div className="input-group">
+                    <div className="flex-between"><label>Baujahr</label><span className="val-display">{calcState.baujahr}</span></div>
+                    <input type="range" min="1950" max="2024" value={calcState.baujahr} className="slider" 
+                           onChange={(e) => handleSliderChange('baujahr', e.target.value)}
+                           style={{ background: getSliderBackground(calcState.baujahr, 1950, 2024) }} />
+                    <div className="slider-labels"><span>1950</span><span>2024</span></div>
                   </div>
 
                   <div className="input-group">
@@ -172,11 +158,12 @@ function App() {
                              className={`option-card ${calcState.daemmstandard === opt ? 'active' : ''}`} 
                              onClick={() => setCalcState({...calcState, daemmstandard: opt})}>
                           <div className="opt-title">{opt === 'ungedaemmt' ? 'Ungedämmt' : opt === 'teilsaniert' ? 'Teilsaniert' : 'KfW-Standard'}</div>
+                          <div className="opt-desc">{opt === 'ungedaemmt' ? 'Vor 1980, keine Sanierung' : opt === 'teilsaniert' ? 'Fenster oder Dach erneuert' : 'Vollsaniert oder Neubau'}</div>
                         </div>
                       ))}
                     </div>
                   </div>
-
+                  
                   <div className="step-footer between">
                     <button className="btn-text" onClick={() => setStep(2)}>Überspringen</button>
                     <button className="btn-primary" disabled={!isStep1Valid} onClick={() => setStep(2)}>Weiter</button>
@@ -188,36 +175,156 @@ function App() {
               {step === 2 && (
                 <div className="calc-step">
                   <h3>Ihre aktuelle Heizung</h3>
+                  <p className="step-desc">Grundlage für den Vergleich mit einer Wärmepumpe.</p>
                   
                   <div className="input-group">
                     <label>Heizungsart</label>
                     <div className="options-grid sm">
-                      {['oel', 'gas', 'nachtspeicher', 'pellets', 'andere'].map(opt => (
-                        <div key={opt} 
-                             className={`option-card ${calcState.heizungsart === opt ? 'active' : ''}`} 
-                             onClick={() => setCalcState({...calcState, heizungsart: opt})}>
-                          <div className="opt-title">{opt.toUpperCase()}</div>
+                      {[
+                        {val: 'oel', label: 'Öl'}, 
+                        {val: 'gas', label: 'Gas'}, 
+                        {val: 'nachtspeicher', label: 'Nachtspeicher'}, 
+                        {val: 'pellets', label: 'Pellets'}, 
+                        {val: 'andere', label: 'Andere'}
+                      ].map(opt => (
+                        <div key={opt.val} 
+                             className={`option-card ${calcState.heizungsart === opt.val ? 'active' : ''}`} 
+                             onClick={() => setCalcState({...calcState, heizungsart: opt.val})}>
+                          <div className="opt-title">{opt.label}</div>
                         </div>
                       ))}
                     </div>
                   </div>
 
+                  <div className="input-group">
+                    <div className="flex-between"><label>Alter der Anlage</label><span className="val-display">{calcState.anlagenalter === 30 ? '30+ Jahre' : `${calcState.anlagenalter} Jahre`}</span></div>
+                    <input type="range" min="0" max="30" value={calcState.anlagenalter} className="slider" 
+                           onChange={(e) => handleSliderChange('anlagenalter', e.target.value)}
+                           style={{ background: getSliderBackground(calcState.anlagenalter, 0, 30) }} />
+                    <div className="slider-labels"><span>neu</span><span>30+ Jahre</span></div>
+                  </div>
+
+                  <div className="input-group">
+                    <div className="flex-between"><label>Aktuelle Heizkosten (Jahr)</label><span className="val-display">{fmt(calcState.heizkosten)} €</span></div>
+                    <input type="range" min="500" max="8000" step="50" value={calcState.heizkosten} className="slider" 
+                           onChange={(e) => handleSliderChange('heizkosten', e.target.value)}
+                           style={{ background: getSliderBackground(calcState.heizkosten, 500, 8000) }} />
+                    <div className="slider-labels"><span>500 €</span><span>8.000 €</span></div>
+                  </div>
+
                   <div className="step-footer between">
-                    <button className="btn-text" onClick={() => setStep(1)}>Zurück</button>
+                    <div className="footer-left">
+                      <button className="btn-text" onClick={() => setStep(1)}>Zurück</button>
+                      <button className="btn-text" onClick={() => setStep(3)}>Überspringen</button>
+                    </div>
                     <button className="btn-primary" disabled={!isStep2Valid} onClick={() => setStep(3)}>Weiter</button>
                   </div>
                 </div>
               )}
 
-              {/* ... (Schritt 3 und 4 folgen analog dem Schema oben) ... */}
-              
+              {/* SCHRITT 3 */}
+              {step === 3 && (
+                <div className="calc-step">
+                  <h3>Heizverteilung im Haus</h3>
+                  <p className="step-desc">Die Heizflächen beeinflussen, wie effizient eine Wärmepumpe arbeitet.</p>
+                  
+                  <div className="input-group">
+                    <div className="options-list">
+                      <div className={`option-card list-item ${calcState.heizverteilung === 'normalkoerper' ? 'active' : ''}`} onClick={() => setCalcState({...calcState, heizverteilung: 'normalkoerper'})}>
+                        <div className="flex-1">
+                          <div className="opt-title">Standard-Heizkörper</div>
+                          <div className="opt-desc">Ältere Heizkörper, im Einzelfall zu prüfen</div>
+                        </div>
+                      </div>
+                      <div className={`option-card list-item ${calcState.heizverteilung === 'niedertemperatur' ? 'active' : ''}`} onClick={() => setCalcState({...calcState, heizverteilung: 'niedertemperatur'})}>
+                        <div className="flex-1">
+                          <div className="opt-title">Niedertemperatur-Heizkörper</div>
+                          <div className="opt-desc">Moderne, großflächige Heizkörper</div>
+                        </div>
+                      </div>
+                      <div className={`option-card list-item ${calcState.heizverteilung === 'fussboden' ? 'active' : ''}`} onClick={() => setCalcState({...calcState, heizverteilung: 'fussboden'})}>
+                        <div className="flex-1">
+                          <div className="opt-title">Fußbodenheizung</div>
+                          <div className="opt-desc">Niedrige Vorlauftemperatur, gut für Wärmepumpen</div>
+                        </div>
+                        <span className="badge">Geeignet</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="step-footer between">
+                    <div className="footer-left">
+                      <button className="btn-text" onClick={() => setStep(2)}>Zurück</button>
+                      <button className="btn-text" onClick={() => setStep(4)}>Überspringen</button>
+                    </div>
+                    <button className="btn-primary" disabled={!isStep3Valid} onClick={() => setStep(4)}>Weiter</button>
+                  </div>
+                </div>
+              )}
+
+              {/* SCHRITT 4 */}
+              {step === 4 && (
+                <div className="calc-step">
+                  <h3>Ihr Strompreis</h3>
+                  <p className="step-desc">Eine Wärmepumpe läuft mit Strom. Voreingestellt ist der deutsche Durchschnitt.</p>
+                  
+                  <div className="input-group">
+                    <div className="flex-between"><label>Strompreis</label><span className="val-display">{calcState.strompreis} ct/kWh</span></div>
+                    <input type="range" min="20" max="50" value={calcState.strompreis} className="slider" 
+                           onChange={(e) => handleSliderChange('strompreis', e.target.value)}
+                           style={{ background: getSliderBackground(calcState.strompreis, 20, 50) }} />
+                    <div className="slider-labels"><span>20 ct</span><span>50 ct</span></div>
+                  </div>
+                  
+                  <div className="info-box">
+                    <div className="eyebrow sm">Zur Einordnung</div>
+                    <p>Der Haushaltsstrompreis lag 2024 im Mittel bei rund 30 bis 32 ct/kWh. Mit einem gesonderten Wärmepumpentarif kann er niedriger ausfallen.</p>
+                  </div>
+
+                  <div className="step-footer between">
+                    <div className="footer-left">
+                      <button className="btn-text" onClick={() => setStep(3)}>Zurück</button>
+                      <button className="btn-text" onClick={showResult}>Überspringen</button>
+                    </div>
+                    <button className="btn-primary" onClick={showResult}>Ergebnis ansehen</button>
+                  </div>
+                </div>
+              )}
+
               {/* ERGEBNIS */}
               {step === 'result' && results && (
                 <div className="calc-step">
+                  <div className="text-center">
+                    <h3>Eine Wärmepumpe <em>lohnt sich</em> für Ihr Haus</h3>
+                    <p className="step-desc">So viel können Sie nach unserer Einschätzung beim Heizen sparen.</p>
+                  </div>
+                  
                   <div className="result-highlight">
                     <span>Rund {results.sparProzent} % weniger Heizkosten pro Jahr</span>
                   </div>
+                  
+                  <div className="result-grid">
+                    <div className="res-card">
+                      <div className="res-label">Heizkosten mit Wärmepumpe</div>
+                      <div className="res-val">ca. {fmt(results.wpCostMin)} €</div>
+                      <div className="res-sub">geschätzt pro Jahr</div>
+                    </div>
+                    <div className="res-card highlight">
+                      <div className="res-label">Ihre Ersparnis pro Jahr</div>
+                      <div className="res-val green">ca. {fmt(results.erspMin)} €</div>
+                      <div className="res-sub">im Vergleich zu heute</div>
+                    </div>
+                    <div className="res-card">
+                      <div className="res-label">Amortisation</div>
+                      <div className="res-val">ca. {results.amortYears} bis {results.amortYears + 3} Jahre</div>
+                      <div className="res-sub">inkl. Förderung, geschätzt</div>
+                    </div>
+                  </div>
+                  
+                  <p className="disclaimer">Die Werte beruhen auf vereinfachten Annahmen und dienen nur der groben Einordnung. Tatsächliche Kosten und Einsparungen hängen von vielen weiteren Faktoren ab. Diese Berechnung ersetzt keine Vor-Ort-Beratung.</p>
+                  
                   <button className="btn-primary full-width" onClick={() => setStep('contact')}>Ergebnis mit einem Fachpartner besprechen</button>
+                  <div className="text-center mt-2"><button className="btn-text" onClick={() => setStep(4)}>Zurück zu den Eingaben</button></div>
                 </div>
               )}
 
@@ -225,27 +332,43 @@ function App() {
               {step === 'contact' && (
                 <div className="calc-step">
                   <h3>Ergebnis besprechen</h3>
-                  <input type="text" placeholder="Vor- und Nachname" className="form-input" 
-                         value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
-                  <input type="tel" placeholder="Telefon" className="form-input" 
-                         value={formData.tel} onChange={e => setFormData({...formData, tel: e.target.value})} />
+                  <p className="step-desc">Hinterlassen Sie Ihre Kontaktdaten, ein Fachpartner aus der Region meldet sich für ein unverbindliches Gespräch.</p>
                   
-                  <div className="checkbox-group">
-                    <input type="checkbox" id="dsgvo" checked={formData.dsgvo} onChange={e => setFormData({...formData, dsgvo: e.target.checked})} />
-                    <label htmlFor="dsgvo">Datenschutzerklärung zustimmen</label>
+                  <div className="form-group">
+                    <label>Name *</label>
+                    <input type="text" placeholder="Vor- und Nachname" className="form-input" 
+                           value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                    
+                    <label>Telefonnummer *</label>
+                    <input type="tel" placeholder="z. B. 05374 123456" className="form-input" 
+                           value={formData.tel} onChange={e => setFormData({...formData, tel: e.target.value})} />
+                    
+                    <div className="form-row">
+                      <div className="flex-1"><label>E-Mail</label><input type="email" className="form-input" placeholder="ihre@email.de" 
+                                                                          value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} /></div>
+                      <div className="flex-1"><label>PLZ / Ort</label><input type="text" className="form-input" placeholder="38547 Calberlah" 
+                                                                             value={formData.plz} onChange={e => setFormData({...formData, plz: e.target.value})} /></div>
+                    </div>
+                    
+                    <div className="checkbox-group">
+                      <input type="checkbox" id="dsgvo" checked={formData.dsgvo} onChange={e => setFormData({...formData, dsgvo: e.target.checked})} />
+                      <label htmlFor="dsgvo">Mit dem Absenden stimmen Sie der Verarbeitung Ihrer Daten gemäß der Datenschutzerklärung zu. Eine Weitergabe an Dritte erfolgt nicht.</label>
+                    </div>
                   </div>
-
+                  
                   <button className="btn-primary full-width" disabled={!isFormValid || isSubmitting} onClick={handleSubmit}>
                     {isSubmitting ? 'Wird gesendet...' : 'Kontakt aufnehmen'}
                   </button>
+                  <div className="text-center mt-2"><button className="btn-text" onClick={() => setStep('result')}>Zurück zum Ergebnis</button></div>
                 </div>
               )}
 
               {/* ERFOLG */}
               {step === 'success' && (
                 <div className="calc-step text-center">
+                  <div className="success-icon">✓</div>
                   <h3>Vielen Dank!</h3>
-                  <p>Ihre Anfrage ist eingegangen.</p>
+                  <p className="step-desc">Ihre Anfrage ist eingegangen. Ein Fachpartner aus der Region wird sich bei Ihnen melden.</p>
                   <button className="btn-outline mt-3" onClick={() => window.location.reload()}>Neue Berechnung starten</button>
                 </div>
               )}
@@ -254,27 +377,11 @@ function App() {
         </div>
       </section>
 
-      {/* --- FAQ --- */}
-      <section id="informationen" className="bg-sand pb-4">
-        <div className="container-md">
-          <h2>Was Hausbesitzer <em>oft fragen</em></h2>
-          <div className="faq-accordion">
-            {['Funktioniert eine Wärmepumpe auch im Altbau?', 'Wie laut ist eine Wärmepumpe?'].map((frage, i) => (
-              <div key={i} className={`faq-item ${activeFaq === i ? 'active' : ''}`}>
-                <button className="faq-btn" onClick={() => setActiveFaq(activeFaq === i ? null : i)}>
-                  {frage} <span className="faq-icon">+</span>
-                </button>
-                <div className="faq-content"><p>Hier steht die Antwort aus der HTML-Vorlage...</p></div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-      
-      {/* Footer */}
-      <footer id="kontakt" className="footer">
-         {/* Footer Inhalt */}
-      </footer>
+      <Ablauf />
+      <Vergleich />
+      <Wissen />
+      <Faq />
+      <Footer />
     </>
   );
 }
