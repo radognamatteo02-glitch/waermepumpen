@@ -1,20 +1,16 @@
+import { Link } from 'react-router-dom';
+
 export default function Footer() {
   return (
     <footer id="kontakt" className="footer">
       <div className="container">
         <div className="footer-grid">
-          <div>
-            <div className="footer-brand">Wärmekompass</div>
-            <p className="footer-desc">Unabhängige Orientierung rund um die Wärmepumpe für die Region Gifhorn · Wolfsburg · Braunschweig.</p>
-          </div>
-          <div>
-            <h4>Kontakt</h4>
-            <p>Wärmekompass<br/>Vorderer Kamp 46, 25479 Ellerau<br/>Telefon: <a href="tel:04023189900">0 176 8128 2082</a><br/><a href="mailto:info@waermekompass.de">info@waermekompass.de</a></p>
-          </div>
+          {/* ... andere Footer-Spalten ... */}
           <div>
             <h4>Rechtliches</h4>
-            <a href="rechtliches/impressum.html">Impressum</a>
-            <a href="rechtliches/datenschutz.html">Datenschutzerklärung</a>
+            {/* WICHTIG: Link statt a verwenden */}
+            <Link to="/impressum">Impressum</Link>
+            <Link to="/datenschutz">Datenschutzerklärung</Link>
           </div>
         </div>
         <div className="footer-bottom">
