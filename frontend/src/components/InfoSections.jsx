@@ -1,4 +1,13 @@
+import { Link } from 'react-router-dom';
+
 export function Hero() {
+  const handleScroll = (id) => {
+    // Scrollt sanft zum Element, sobald React auf der Startseite ist
+    setTimeout(() => {
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    }, 10);
+  };
+
   return (
     <section id="hero" className="bg-light">
       <div className="container hero-container">
@@ -8,8 +17,13 @@ export function Hero() {
           <div className="hero-text">
             <p>Mit wenigen Angaben erhalten Sie eine erste, sachliche Einschätzung für Ihr Zuhause. Im Anschluss meldet sich ein Fachbetrieb aus Ihrer Region und bespricht alles Weitere in Ruhe mit Ihnen.</p>
             <div className="hero-buttons">
-              <a href="#rechner" className="btn-primary">Jetzt kostenlos berechnen</a>
-              <a href="#informationen" className="btn-link">Wie funktioniert das?</a>
+              {/* Wir nutzen <Link to="/"> um sicherzustellen, dass wir auf der Home-Seite sind, und triggern das Scrollen */}
+              <Link to="/" className="btn-primary" onClick={() => handleScroll('rechner')}>
+                Kostenlos berechnen
+              </Link>
+              <Link to="/" className="btn-link" onClick={() => handleScroll('informationen')}>
+                Wie funktioniert das?
+              </Link>
             </div>
             <div className="hero-subtext">In rund 2 Minuten zu Ihrer persönlichen Einschätzung. Kostenlos und unverbindlich.</div>
           </div>

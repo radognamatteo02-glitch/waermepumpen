@@ -1,14 +1,37 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function Navbar() {
   const [isNavScrolled, setIsNavScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  // React Router Hooks für die Navigation
+  const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => setIsNavScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Unsere eigene Scroll-Logik
+  const scrollTo = (e, id) => {
+    e.preventDefault();
+    setIsMobileMenuOpen(false); // Schließt das mobile Menü automatisch
+
+    if (location.pathname !== '/') {
+      // Wenn der User auf einer Unterseite (z.B. Impressum) ist: 
+      // Erst zur Startseite wechseln, kurz warten und dann scrollen
+      navigate('/');
+      setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      // Wenn der User schon auf der Startseite ist: Direkt scrollen
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
     <header>
@@ -31,21 +54,20 @@ export default function Navbar() {
       
       <nav id="main-nav" className={isNavScrolled ? 'scrolled' : ''}>
         <div className="nav-content">
-          <div className="nav-brand" onClick={() => window.scrollTo(0,0)}>
+          <div className="nav-brand" onClick={(e) => scrollTo(e, 'root')} style={{ cursor: 'pointer' }}>
             <svg width="27" height="27" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="13.5" stroke="#234034" strokeWidth="1"></circle><circle cx="16" cy="16" r="9.5" stroke="#234034" strokeWidth="0.7" opacity="0.28"></circle><path d="M16 6L19 16L16 16Z" fill="#234034"></path><path d="M16 6L13 16L16 16Z" fill="#234034" opacity="0.6"></path><path d="M16 26L19 16L16 16Z" fill="#234034" opacity="0.2"></path><path d="M16 26L13 16L16 16Z" fill="#234034" opacity="0.32"></path><circle cx="16" cy="16" r="1.5" fill="#234034"></circle><path d="M16 2.8v2M16 27.2v2M2.8 16h2M27.2 16h2" stroke="#234034" strokeWidth="1" strokeLinecap="round"></path></svg>
             <span>Wärmekompass</span>
           </div>
           
           <div className="nav-links hide-mobile">
-            <a href="#rechner">Rechner</a>
-            <a href="#so-funktioniert-es">Ablauf</a>
-            <a href="#informationen">Wissen</a>
-            <a href="#kontakt">Kontakt</a>
+            <a href="#rechner" onClick={(e) => scrollTo(e, 'rechner')}>Rechner</a>
+            <a href="#so-funktioniert-es" onClick={(e) => scrollTo(e, 'so-funktioniert-es')}>Ablauf</a>
+            <a href="#informationen" onClick={(e) => scrollTo(e, 'informationen')}>Wissen</a>
+            <a href="#kontakt" onClick={(e) => scrollTo(e, 'kontakt')}>Kontakt</a>
           </div>
           
           <div className="nav-actions">
-            {/* Das "hide-mobile" sorgt dafür, dass dieser Button auf dem Smartphone oben verschwindet */}
-            <a href="#rechner" className="btn-primary hide-mobile">Kostenlos berechnen</a>
+            <a href="#rechner" className="btn-primary hide-mobile" onClick={(e) => scrollTo(e, 'rechner')}>Kostenlos berechnen</a>
             
             <button id="mobile-menu-btn" className="show-mobile-flex" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
               <svg width="20" height="14" viewBox="0 0 20 14" fill="none"><rect width="20" height="1.6" rx="0.8" fill="#1B2A20"></rect><rect y="6.2" width="20" height="1.6" rx="0.8" fill="#1B2A20"></rect><rect y="12.4" width="20" height="1.6" rx="0.8" fill="#1B2A20"></rect></svg>
@@ -53,16 +75,14 @@ export default function Navbar() {
           </div>
         </div>
         
-        {/* COLLAPSE ITEM (Mobiles Menü) */}
         {isMobileMenuOpen && (
-          <div id="mobile-menu" onClick={() => setIsMobileMenuOpen(false)} style={{ display: 'flex' }}>
-            <a href="#rechner">Rechner</a>
-            <a href="#so-funktioniert-es">Ablauf</a>
-            <a href="#informationen">Wissen</a>
-            <a href="#kontakt">Kontakt</a>
+          <div id="mobile-menu" style={{ display: 'flex' }}>
+            <a href="#rechner" onClick={(e) => scrollTo(e, 'rechner')}>Rechner</a>
+            <a href="#so-funktioniert-es" onClick={(e) => scrollTo(e, 'so-funktioniert-es')}>Ablauf</a>
+            <a href="#informationen" onClick={(e) => scrollTo(e, 'informationen')}>Wissen</a>
+            <a href="#kontakt" onClick={(e) => scrollTo(e, 'kontakt')}>Kontakt</a>
             
-            {/* Hier ist der Button jetzt für Smartphones integriert. Er nutzt die volle Breite des Menüs */}
-            <a href="#rechner" className="btn-primary" style={{ marginTop: '12px', textAlign: 'center' }}>
+            <a href="#rechner" className="btn-primary" style={{ marginTop: '12px', textAlign: 'center' }} onClick={(e) => scrollTo(e, 'rechner')}>
               Kostenlos berechnen
             </a>
           </div>
