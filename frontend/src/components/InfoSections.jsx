@@ -37,7 +37,7 @@ export function Hero() {
 export function ImageBanner() {
   return (
     <div style={{ width: '100%', height: 'clamp(320px, 52vw, 640px)', overflow: 'hidden', background: 'rgb(231, 224, 210)' }}>
-      <img src="/imgs/5f85d684-7ee7-43ba-84b7-e825c9232591.jpg" alt="Luft-Wärmepumpe im Garten eines Wohnhauses" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 60%', display: 'block' }} />
+      <img src="/imgs/pexels-alpha-innotec-936418931-20046693.jpg" alt="Luft-Wärmepumpe im Garten eines Wohnhauses" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 60%', display: 'block' }} />
     </div>
   );
 }
