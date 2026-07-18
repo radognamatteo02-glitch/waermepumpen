@@ -19,15 +19,14 @@ export default function Home({ step, setStep, calcState, setCalcState, formData,
 
           <div className="calculator-card">
             <div className="progress-bar-container">
-              <div className="progress-bar" style={{ width: typeof step === 'number' ? `${step * 25}%` : '100%' }}></div>
+              <div className="progress-bar" style={{ width: typeof step === 'number' ? `${(step / 3) * 100}%` : '100%' }}></div>
             </div>
             
             <div className="card-header">
               <span className="step-label">
-                {step === 1 ? 'Schritt 1 von 4 · Gebäude' : 
-                 step === 2 ? 'Schritt 2 von 4 · Heizung' : 
-                 step === 3 ? 'Schritt 3 von 4 · Heizverteilung' : 
-                 step === 4 ? 'Schritt 4 von 4 · Strompreis' : 
+                {step === 1 ? 'Schritt 1 von 3 – Gebäude' :
+                step === 2 ? 'Schritt 2 von 3 – Heizung' :
+                step === 3 ? 'Schritt 3 von 3 – Heizverteilung' :
                  step === 'result' ? 'Ihr Ergebnis' : 
                  step === 'contact' ? 'Kontakt' : 'Gesendet'}
               </span>
@@ -90,7 +89,7 @@ export default function Home({ step, setStep, calcState, setCalcState, formData,
                         {val: 'oel', label: 'Öl'}, 
                         {val: 'gas', label: 'Gas'}, 
                         {val: 'nachtspeicher', label: 'Nachtspeicher'}, 
-                        {val: 'pellets', label: 'Pellets'}, 
+                        {val: 'aeltere_wp', label: 'Ältere Wärmepumpe'},
                         {val: 'andere', label: 'Andere'}
                       ].map(opt => (
                         <div key={opt.val} 
@@ -111,11 +110,11 @@ export default function Home({ step, setStep, calcState, setCalcState, formData,
                   </div>
 
                   <div className="input-group">
-                    <div className="flex-between"><label>Aktuelle Heizkosten (Jahr)</label><span className="val-display">{fmt(calcState.heizkosten)} €</span></div>
-                    <input type="range" min="500" max="8000" step="50" value={calcState.heizkosten} className="slider" 
-                           onChange={(e) => handleSliderChange('heizkosten', e.target.value)}
-                           style={{ background: getSliderBackground(calcState.heizkosten, 500, 8000) }} />
-                    <div className="slider-labels"><span>500 €</span><span>8.000 €</span></div>
+                    <div className="flex-between"><label>Aktueller Verbrauch in kWh pro Jahr</label><span className="val-display">{fmt(calcState.verbrauchKwh)} kWh</span></div>
+                    <input type="range" min="5000" max="40000" step="500" value={calcState.verbrauchKwh} className="slider"
+                            onChange={(e) => handleSliderChange('verbrauchKwh', e.target.value)}
+                          style={{ background: getSliderBackground(calcState.verbrauchKwh, 5000, 40000) }} />
+                    <div className="slider-labels"><span>5.000 kWh</span><span>40.000 kWh</span></div>
                   </div>
 
                   <div className="step-footer between">
@@ -153,7 +152,6 @@ export default function Home({ step, setStep, calcState, setCalcState, formData,
                           <div className="opt-title">Fußbodenheizung</div>
                           <div className="opt-desc">Niedrige Vorlauftemperatur, gut für Wärmepumpen</div>
                         </div>
-                        <span className="badge">Geeignet</span>
                       </div>
                     </div>
                   </div>
@@ -161,9 +159,9 @@ export default function Home({ step, setStep, calcState, setCalcState, formData,
                   <div className="step-footer between">
                     <div className="footer-left">
                       <button className="btn-text" onClick={() => setStep(2)}>Zurück</button>
-                      <button className="btn-text" onClick={() => setStep(4)}>Überspringen</button>
+                      <button className="btn-text" onClick={showResult}>Überspringen</button>
                     </div>
-                    <button className="btn-primary" disabled={!isStep3Valid} onClick={() => setStep(4)}>Weiter</button>
+                    <button className="btn-primary" disabled={!isStep3Valid} onClick={showResult}>Ergebnis ansehen</button>
                   </div>
                 </div>
               )}
@@ -211,19 +209,16 @@ export default function Home({ step, setStep, calcState, setCalcState, formData,
                   
                   <div className="result-grid">
                     <div className="res-card">
-                      <div className="res-label">Heizkosten mit Wärmepumpe</div>
-                      <div className="res-val">ca. {fmt(results.wpCostMin)} €</div>
-                      <div className="res-sub">geschätzt pro Jahr</div>
+                      <div className="res-label">Ersparnis in kWh</div>
+                      <div className="res-val green">{fmt(results.ersparnisKwh)} kWh</div>
                     </div>
                     <div className="res-card highlight">
-                      <div className="res-label">Ihre Ersparnis pro Jahr</div>
-                      <div className="res-val green">ca. {fmt(results.erspMin)} €</div>
-                      <div className="res-sub">im Vergleich zu heute</div>
+                      <div className="res-label">Ersparnis in %</div>
+                      <div className="res-val green">{results.ersparnisProzent} %</div>
                     </div>
-                    <div className="res-card">
-                      <div className="res-label">Amortisation</div>
-                      <div className="res-val">ca. {results.amortYears} bis {results.amortYears + 3} Jahre</div>
-                      <div className="res-sub">inkl. Förderung, geschätzt</div>
+                    <div className="res-card" style={{ gridColumn: "1 / -1" }}>
+                      <div className="res-label">Förderung</div>
+                      <div className="res-val">70 %</div>
                     </div>
                   </div>
                   

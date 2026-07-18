@@ -53,7 +53,7 @@ export function WarumWaermepumpe() {
         </div>
         <div className="feature-stats">
           <div className="stat-item">
-            <div className="stat-title">3 bis 4 kWh</div>
+            <div className="stat-title">4 bis 6 kWh</div>
             <div className="stat-desc">Wärme aus einer Kilowattstunde Strom. Der Rest kommt kostenlos aus der Umwelt.</div>
           </div>
           <div className="stat-item">
@@ -81,7 +81,7 @@ export function Ablauf() {
           <div className="process-step">
             <div className="step-number">01</div>
             <div className="step-title"><h3>Rechner ausfüllen</h3></div>
-            <p className="step-text">Vier kurze Fragen zu Ihrem Gebäude, in wenigen Minuten erledigt, ohne Anmeldung.</p>
+            <p className="step-text">Drei kurze Fragen zu Ihrem Gebäude, in wenigen Minuten erledigt, ohne Anmeldung.</p>
           </div>
           <div className="process-step">
             <div className="step-number">02</div>
@@ -162,15 +162,15 @@ export function Wissen() {
             <div className="info-table">
               <div className="info-table-row">
                 <span className="info-table-title">Neubau</span>
-                <span className="info-table-desc">Fußbodenheizung und gute Dämmung, nahezu ideal</span>
+                <span className="info-table-desc">Fußbodenheizung und gute Dämmung, optimal, aber keine Förderung</span>
               </div>
               <div className="info-table-row">
                 <span className="info-table-title">Sanierter Altbau</span>
-                <span className="info-table-desc">Neue Fenster, gedämmtes Dach, meist gut geeignet</span>
+                <span className="info-table-desc">neue Fenster, gedämmtes Dach, nahezu ideal</span>
               </div>
               <div className="info-table-row no-border">
                 <span className="info-table-title">Unsanierter Altbau</span>
-                <span className="info-table-desc">Oft machbar, teils mit angepassten Heizkörpern</span>
+                <span className="info-table-desc">realisierbar, teils mit angepassten Heizkörpern</span>
               </div>
             </div>
             <p className="info-note">Sicherheit bringt am Ende der Blick auf Ihr konkretes Haus. Genau dafür ist die Vor-Ort-Beratung da.</p>

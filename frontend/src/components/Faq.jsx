@@ -3,18 +3,22 @@ import { useState } from 'react';
 export default function Faq() {
   const [activeFaq, setActiveFaq] = useState(null);
 
-  const faqData = [
+const faqData = [
+    {
+      q: "Was gilt bei der Förderung?",
+      a: "Für den Tausch alter Öl- und Gasheizungen, sowie Wärmepumpen und Fernheizungsanschlüsse gewährt der Staat über die Bundesförderung für effiziente Gebäude (BEG) Zuschüsse. Höhe und Voraussetzungen hängen von mehreren Faktoren ab und werden regelmäßig angepasst. Welche Sätze für Ihr Vorhaben gelten, klärt der Fachpartner mit Ihnen, verlässliche Zahlen gibt es nur im konkreten Fall."
+    },
     {
       q: "Funktioniert eine Wärmepumpe auch im Altbau?",
-      a: "In vielen Fällen ja, vor allem nach einer energetischen Sanierung. Ob es sich für Ihr Gebäude eignet, hängt von Dämmung, Heizflächen und Aufstellort ab. Das lässt sich nur im Einzelfall vor Ort beurteilen."
+      a: "Generell ja, vor allem nach einer energetischen Sanierung. Ob es sich für Ihr Gebäude eignet, hängt von Dämmung, Heizflächen und Aufstellort ab. Das lässt sich nur im Einzelfall vor Ort beurteilen."
     },
     {
       q: "Wie laut ist eine Wärmepumpe?",
-      a: "Aktuelle Luft-Wärmepumpen liegen im Betrieb meist bei rund 40–55 dB(A), vergleichbar mit einem ruhigen Gespräch. Aufstellort und Ausrichtung beeinflussen die wahrgenommene Lautstärke deutlich."
+      a: "Moderne Luft-Wärmepumpen liegen im Betrieb meist bei rund 40–55 dB(A), vergleichbar mit einem ruhigen Gespräch. Aufstellort und Ausrichtung beeinflussen die wahrgenommene Lautstärke deutlich."
     },
     {
       q: "Brauche ich eine Fußbodenheizung?",
-      a: "Nicht zwingend. Eine Fußbodenheizung verbessert die Effizienz, doch auch mit geeigneten Heizkörpern lässt sich eine Wärmepumpe betreiben, mitunter nach Austausch einzelner Heizkörper."
+      a: "Nein. Eine Fußbodenheizung verbessert die Effizienz, doch auch mit geeigneten Heizkörpern lässt sich eine Wärmepumpe betreiben."
     },
     {
       q: "Was kostet eine Wärmepumpe?",

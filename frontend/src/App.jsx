@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
 import Impressum from './components/Impressum';
@@ -10,15 +10,14 @@ import './index.css';
 function App() {
   // --- Rechner State ---
   const [step, setStep] = useState(1);
-  const [calcState, setCalcState] = useState({
+const [calcState, setCalcState] = useState({
     wohnflaeche: 150,
     baujahr: 1985,
     daemmstandard: null,
     heizungsart: null,
     anlagenalter: 15,
-    heizkosten: 2400,
-    heizverteilung: null,
-    strompreis: 30
+    verbrauchKwh: 15000,
+    heizverteilung: null
   });
 
   const [formData, setFormData] = useState({ name: '', tel: '', email: '', plz: '', dsgvo: false });
@@ -38,36 +37,14 @@ function App() {
   };
 
   // --- Rechner Berechnungslogik ---
-  const showResult = () => {
-    let sparQuote = 0.34;
-    if (calcState.heizungsart === 'oel') sparQuote += 0.08;
-    else if (calcState.heizungsart === 'nachtspeicher') sparQuote += 0.12;
-    else if (calcState.heizungsart === 'gas') sparQuote += 0.04;
+const showResult = () => {
+    // Beispielhafte Berechnung: Wärmepumpe macht aus 1 Teil Strom ca. 3.5 Teile Wärme
+    const cop = 3.5; 
+    const neueKwh = calcState.verbrauchKwh / cop;
+    const ersparnisKwh = Math.round(calcState.verbrauchKwh - neueKwh);
+    const ersparnisProzent = Math.round((ersparnisKwh / calcState.verbrauchKwh) * 100);
 
-    sparQuote += Math.min(0.12, (calcState.anlagenalter / 30) * 0.12);
-    if (calcState.heizverteilung === 'fussboden') sparQuote += 0.05;
-    else if (calcState.heizverteilung === 'normalkoerper') sparQuote -= 0.02;
-    if (calcState.daemmstandard === 'kfw') sparQuote += 0.03;
-
-    sparQuote -= Math.max(0, (calcState.strompreis - 30) / 100) * 0.4;
-    sparQuote = Math.max(0.24, Math.min(0.52, sparQuote));
-
-    const sparMinQ = Math.max(0.20, sparQuote - 0.06);
-    const sparMaxQ = Math.min(0.58, sparQuote + 0.06);
-
-    const erspMin = Math.round((calcState.heizkosten * sparMinQ) / 50) * 50;
-    const erspMax = Math.round((calcState.heizkosten * sparMaxQ) / 50) * 50;
-    const wpCostMin = Math.round((calcState.heizkosten - erspMax) / 50) * 50;
-    const wpCostMax = Math.round((calcState.heizkosten - erspMin) / 50) * 50;
-
-    const netInvest = 12000;
-    const erspAvg = Math.max(200, (erspMin + erspMax) / 2);
-    let amortYears = Math.round(netInvest / erspAvg);
-    amortYears = Math.max(6, Math.min(13, amortYears));
-
-    const sparProzent = Math.round(((erspMin + erspMax) / 2 / Math.max(1, calcState.heizkosten)) * 100);
-
-    setResults({ sparProzent, wpCostMin, wpCostMax, erspMin, erspMax, amortYears });
+    setResults({ ersparnisKwh, ersparnisProzent });
     setStep('result');
   };
 
