@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import WaermepumpeAnimation from './Animation.jsx';
 
 export function Hero() {
   const handleScroll = (id) => {
@@ -37,7 +38,7 @@ export function Hero() {
 export function ImageBanner() {
   return (
     <div style={{ width: '100%', height: 'clamp(320px, 52vw, 640px)', overflow: 'hidden', background: 'rgb(231, 224, 210)' }}>
-      <img src="/imgs/pexels-alpha-innotec-936418931-20046693.jpg" alt="Luft-Wärmepumpe im Garten eines Wohnhauses" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 60%', display: 'block' }} />
+      <img src="/imgs/Wärmepumpe_vor_Haus_2.png" alt="Luft-Wärmepumpe im Garten eines Wohnhauses" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 60%', display: 'block' }} />
     </div>
   );
 }
@@ -104,7 +105,7 @@ export function Vergleich() {
     <section id="vergleich" className="bg-dark">
       <div className="compare-wrapper">
         <div className="compare-image-box">
-          <img src="/imgs/c0773d3e-960c-49ec-ae25-8229367a3f88.jpg" alt="Wärmepumpe an einer Hausterrasse" />
+          <img src="/imgs/Waermepumpe_an_Hausterrasse.png" alt="Wärmepumpe an einer Hausterrasse" />
         </div>
         <div className="compare-content">
           <div className="eyebrow eyebrow-light">Heute & mit Wärmepumpe</div>
@@ -146,14 +147,14 @@ export function Wissen() {
 
         <div className="info-row">
           <div className="info-image order-1">
-            <img src="/imgs/f378725a-9de8-45bf-863c-f911b1c5431e.jpg" alt="Wärmepumpe an einem modernen Wohnhaus" />
+            <img src="/imgs/Waermepumpe_modernes_Haus.png" alt="Wärmepumpe an einem modernen Wohnhaus" />
           </div>
           <div className="info-text">
             <h3>Wie funktioniert eine Wärmepumpe?</h3>
             <p>Sie entzieht der Außenluft Wärme und hebt diese mit etwas Strom auf ein Niveau, das zum Heizen reicht. Aus einer Kilowattstunde Strom werden so, je nach System und Gebäude, mehrere Kilowattstunden Heizwärme. Der größere Teil der Energie stammt kostenlos aus der Umgebung.</p>
           </div>
         </div>
-
+        <WaermepumpeAnimation />
         <div className="info-row">
           <div className="info-text">
             <h3>Für wen kommt sie infrage?</h3>
@@ -176,7 +177,7 @@ export function Wissen() {
             <p className="info-note">Sicherheit bringt am Ende der Blick auf Ihr konkretes Haus. Genau dafür ist die Vor-Ort-Beratung da.</p>
           </div>
           <div className="info-image">
-            <img src="/imgs/6518835a-81c7-4819-b882-ab30e6b7c04f.jpg" alt="Wärmepumpe an einem Klinker-Altbau" />
+            <img src="/imgs/Wärmepumpe_vor_Haus_1.png" alt="Wärmepumpe an einem Klinker-Altbau" />
           </div>
         </div>
 

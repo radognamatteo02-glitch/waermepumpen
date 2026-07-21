@@ -1,0 +1,16 @@
+/* Normaler Zustand */
+#main-nav {
+  width: 100%;
+  background-color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+/* Sobald gescrollt wurde (wird von deiner React-Komponente gesteuert) */
+#main-nav.scrolled {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}

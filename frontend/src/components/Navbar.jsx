@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-
+import './styles/Navbar.css';
 export default function Navbar() {
   const [isNavScrolled, setIsNavScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -38,17 +38,23 @@ export default function Navbar() {
       <div className="top-bar">
         <div className="top-bar-content">
           <a href="tel:04023189900" className="top-bar-link" style={{ display: 'none' }}>
-            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#7fa890" strokeWidth="1.4"><path d="M5.5 2.5 3 3.2c-.6.2-.9.8-.8 1.4.6 3.7 3.6 6.7 7.3 7.3.6.1 1.2-.2 1.4-.8l.7-2.5-2.7-1.1-1 1.3C6.9 8.2 5.4 6.7 4.7 5l1.3-1L5.5 2.5Z" strokeLinejoin="round"></path></svg>
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#7fa890" strokeWidth="1.4">
+              <path d="M5.5 2.5 3 3.2c-.6.2-.9.8-.8 1.4.6 3.7 3.6 6.7 7.3 7.3.6.1 1.2-.2 1.4-.8l.7-2.5-2.7-1.1-1 1.3C6.9 8.2 5.4 6.7 4.7 5l1.3-1L5.5 2.5Z" strokeLinejoin="round"></path>
+            </svg>
             <span className="top-bar-text">040 / 23 18 99 00</span>
             <span className="top-bar-sub hide-mobile">Rückruf anfordern</span>
           </a>
-          <span className="hide-mobile">
-            <a href="mailto:info@waermekompass.de" className="top-bar-link">
-              <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#7fa890" strokeWidth="1.4"><rect x="2" y="3.5" width="12" height="9" rx="1.2"></rect><path d="m2.5 4.5 5.5 4 5.5-4" strokeLinejoin="round"></path></svg>
-              <span className="top-bar-text">info<span>@</span>waermekompass.de</span>
-              <span className="top-bar-sub">Einfach per Mail anfragen</span>
-            </a>
-          </span>
+
+          {/* hide-mobile vom umschließenden <span> entfernt */}
+          <a href="mailto:info@waermekompass.de" className="top-bar-link">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="#7fa890" strokeWidth="1.4">
+              <rect x="2" y="3.5" width="12" height="9" rx="1.2"></rect>
+              <path d="m2.5 4.5 5.5 4 5.5-4" strokeLinejoin="round"></path>
+            </svg>
+            <span className="top-bar-text">info<span>@</span>waermekompass.de</span>
+            {/* hide-mobile nur auf den Untertext angewendet, um Platz zu sparen */}
+            <span className="top-bar-sub hide-mobile">Einfach per Mail anfragen</span>
+          </a>
         </div>
       </div>
       

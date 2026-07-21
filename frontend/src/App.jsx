@@ -1,3 +1,5 @@
+import React from 'react';
+import CookieBanner from './components/CookieBanner';
 import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
@@ -88,6 +90,7 @@ const calculatorProps = { step, setStep, calcState, setCalcState, formData, setF
       </Routes>
 
       <Footer />
+      <CookieBanner />
     </Router>
   );
 }

@@ -1,4 +1,6 @@
 import { Hero, ImageBanner, WarumWaermepumpe, Ablauf, Vergleich, Wissen } from './InfoSections';
+
+
 //import CalculatorSection from './CalculatorSection'; // Falls du den Rechner-JSX-Teil auch auslagern willst, oder du lässt ihn hier drin
 import Faq from './Faq';
 
@@ -281,6 +283,7 @@ export default function Home({ step, setStep, calcState, setCalcState, formData,
       <Ablauf />
       <Vergleich />
       <Wissen />
+
       <Faq />
     </>
   );

@@ -79,7 +79,7 @@ export default function Datenschutz() {
           
           <h3 style={{ marginTop: '20px', fontSize: '1.2rem' }}>6.4 Cookie-Einwilligung</h3>
           <p>Beim ersten Besuch unserer Website werden Sie über das Cookie-Consent-Tool</p>
-          <p style={{ color: '#c0392b', fontWeight: '600' }}>[PLATZHALTER: Name des eingesetzten Cookie-Consent-Tools noch offen — bitte ergänzen, z. B. Usercentrics, Cookiebot, Real Cookie Banner]</p>
+          <p style={{ color: '#c0392b', fontWeight: '600', display: 'none' }}>[PLATZHALTER: Name des eingesetzten Cookie-Consent-Tools noch offen — bitte ergänzen, z. B. Usercentrics, Cookiebot, Real Cookie Banner]</p>
           <p>gefragt, welchen der oben beschriebenen, nicht technisch notwendigen Cookies Sie zustimmen. Die entsprechenden Skripte (Google Ads, Google Analytics) werden erst nach Ihrer aktiven Einwilligung geladen. Sie können Ihre Einwilligung jederzeit mit Wirkung für die Zukunft über die Cookie-Einstellungen (Link im Footer der Website) widerrufen oder anpassen.</p>
 
           {/* ================= SEKTION 7 ================= */}

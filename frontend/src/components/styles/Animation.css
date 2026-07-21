@@ -1,0 +1,220 @@
+/* Wärmepumpe – Montage-Animation
+   Bindet optional die Google Fonts "Sora" und "Inter" ein.
+   Falls dein Projekt Fonts anders lädt, kannst du die nächste Zeile entfernen
+   und die Fonts stattdessen global (z. B. in index.html) einbinden. */
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@400;500&display=swap');
+
+.wp-montage {
+  --wp-cream: #F6F2E9;
+  --wp-pine: #1E4A3C;
+  --wp-pine-soft: #2C6152;
+  --wp-anthracite: #26292B;
+  --wp-anthracite-2: #33373A;
+  --wp-panel: #EDEDEA;
+  --wp-copper: #B87343;
+  --wp-fin: #1D5C63;
+  --wp-ink: #1C221F;
+
+  font-family: 'Inter', sans-serif;
+  color: var(--wp-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+}
+
+.wp-montage *,
+.wp-montage *::before,
+.wp-montage *::after {
+  box-sizing: border-box;
+}
+
+.wp-stage {
+  width: min(940px, 100%);
+}
+
+.wp-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.wp-head h1 {
+  font-family: 'Sora', sans-serif;
+  font-weight: 700;
+  font-size: clamp(20px, 3.4vw, 30px);
+  color: var(--wp-pine);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.wp-eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--wp-pine-soft);
+  font-weight: 500;
+}
+
+.wp-canvas {
+  background: linear-gradient(180deg, #FBF9F3 0%, var(--wp-cream) 100%);
+  border: 1px solid rgba(30, 74, 60, 0.14);
+  border-radius: 18px;
+  padding: clamp(8px, 2vw, 24px);
+  overflow: hidden;
+}
+
+.wp-canvas svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ---- generic part entry ---- */
+.wp-part {
+  opacity: 0;
+  transition: opacity .38s ease, transform .55s cubic-bezier(.22, 1.15, .32, 1); /* slight overshoot */
+}
+.wp-part.in {
+  opacity: 1;
+  transform: translate(0, 0) scale(1) rotate(0deg) !important;
+}
+
+.from-top { transform: translateY(-130px); }
+.from-top-far { transform: translateY(-200px) scale(1.04); }
+.from-bottom { transform: translateY(120px); }
+.from-left { transform: translateX(-150px); }
+.from-right { transform: translateX(150px); }
+.from-deep { transform: translateY(-50px) scale(.9); transform-origin: center; }
+.from-spin { transform: translateY(-90px) rotate(-120deg); transform-origin: center; }
+
+/* screws twist in */
+.wp-screw {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: translateY(-70px) rotate(-360deg);
+}
+
+/* copper pipes draw themselves */
+.wp-pipe-draw path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset .9s ease .1s;
+}
+.wp-pipe-draw.in path { stroke-dashoffset: 0; }
+.wp-pipe-draw circle { opacity: 0; transition: opacity .3s ease .8s; }
+.wp-pipe-draw.in circle { opacity: 1; }
+
+/* fins wipe in */
+#wpFinClipRect {
+  transition: width .7s ease .15s;
+}
+
+/* landing pulse */
+.wp-pulse {
+  fill: none;
+  stroke: var(--wp-copper);
+  stroke-width: 3;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.wp-pulse.go { animation: wp-pulse .6s ease-out forwards; }
+@keyframes wp-pulse {
+  0% { opacity: .9; transform: scale(.4); }
+  100% { opacity: 0; transform: scale(1.6); }
+}
+
+/* fan spin + startup */
+#wpFanBlade { transform-box: fill-box; transform-origin: center; }
+.spinning #wpFanBlade {
+  animation: wp-spin 1.6s cubic-bezier(.4, 0, .7, 1) 1, wp-spin-loop 2.2s linear .9s infinite;
+}
+@keyframes wp-spin { from { transform: rotate(0); } to { transform: rotate(240deg); } }
+@keyframes wp-spin-loop { to { transform: rotate(360deg); } }
+
+/* heat shimmer at the end */
+.wp-heat { opacity: 0; }
+.spinning .wp-heat { opacity: 1; transition: opacity .8s ease .6s; }
+.spinning .wp-heat path { animation: wp-rise 2.4s ease-in-out infinite; }
+.spinning .wp-heat path:nth-child(2) { animation-delay: .8s; }
+.spinning .wp-heat path:nth-child(3) { animation-delay: 1.5s; }
+@keyframes wp-rise {
+  0% { transform: translateY(0); opacity: 0; }
+  25% { opacity: .7; }
+  100% { transform: translateY(-46px); opacity: 0; }
+}
+
+/* status LED on the unit */
+#wpLed { opacity: 0; }
+.spinning #wpLed { opacity: 1; animation: wp-blink 2.2s ease-in-out infinite; }
+@keyframes wp-blink { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+
+/* ---- caption / progress ---- */
+.wp-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.wp-caption {
+  font-family: 'Sora', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--wp-ink);
+  min-height: 22px;
+}
+.wp-caption .wp-num {
+  color: var(--wp-copper);
+  font-variant-numeric: tabular-nums;
+  margin-right: 8px;
+}
+
+.wp-progress {
+  flex: 1 1 160px;
+  max-width: 260px;
+  height: 5px;
+  border-radius: 99px;
+  background: rgba(30, 74, 60, 0.15);
+  overflow: hidden;
+}
+.wp-progress i {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 99px;
+  background: var(--wp-pine);
+  transition: width .4s ease;
+  font-style: normal;
+}
+
+.wp-replay {
+  font-family: 'Sora', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--wp-cream);
+  background: var(--wp-pine);
+  border: none;
+  border-radius: 999px;
+  padding: 10px 22px;
+  cursor: pointer;
+  transition: background .25s, transform .15s;
+}
+.wp-replay:hover { background: var(--wp-pine-soft); }
+.wp-replay:active { transform: scale(.97); }
+.wp-replay:focus-visible { outline: 3px solid var(--wp-copper); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .wp-part { transition: opacity .3s ease; transform: none !important; }
+  .wp-pipe-draw path { transition: none; stroke-dashoffset: 0; }
+  .spinning #wpFanBlade,
+  .spinning .wp-heat path,
+  #wpLed { animation: none !important; }
+  .wp-pulse.go { animation: none; }
+}
