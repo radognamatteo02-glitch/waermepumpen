@@ -2,169 +2,303 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './styles/Cookiebanner.css';
 
+// Google Analytics 4 Measurement ID
+const GA_ID = 'G-5GVE6GGBKS';
+// Google Ads Conversion ID -- auf die echte ID setzen oder auf null lassen,
+// dann wird die Marketing-Kategorie automatisch ausgeblendet.
+const ADS_ID = null; // z. B. 'AW-123456789'
+
+const STORAGE_KEY = 'waermepumpen_consent';
+const CONSENT_VERSION = '1.2'; // bei Textaenderungen hochzaehlen -> erneute Abfrage
+const CONSENT_MAX_AGE_MS = 365 * 24 * 60 * 60 * 1000;
+
+const EMPTY_CONSENT = { statistics: false, marketing: false };
+
+/** gtag-Stub, damit consent-Befehle auch vor dem Laden der Bibliothek greifen. */
+function ensureGtagStub() {
+  window.dataLayer = window.dataLayer || [];
+  if (typeof window.gtag !== 'function') {
+    window.gtag = function gtag() {
+      window.dataLayer.push(arguments);
+    };
+  }
+  return window.gtag;
+}
+
+/** Consent Mode v2: vor jedem Tag-Laden auf "denied" setzen. */
+function setConsentDefaults() {
+  const gtag = ensureGtagStub();
+  gtag('consent', 'default', {
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+    analytics_storage: 'denied',
+    functionality_storage: 'granted',
+    security_storage: 'granted',
+    wait_for_update: 500,
+  });
+}
+
+function updateConsentMode(consent) {
+  const gtag = ensureGtagStub();
+  gtag('consent', 'update', {
+    ad_storage: consent.marketing ? 'granted' : 'denied',
+    ad_user_data: consent.marketing ? 'granted' : 'denied',
+    ad_personalization: consent.marketing ? 'granted' : 'denied',
+    analytics_storage: consent.statistics ? 'granted' : 'denied',
+  });
+}
+
+function loadGtagLibrary(primaryId) {
+  if (document.getElementById('gtag-script')) return;
+  const script = document.createElement('script');
+  script.id = 'gtag-script';
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${primaryId}`;
+  document.head.appendChild(script);
+
+  const gtag = ensureGtagStub();
+  gtag('js', new Date());
+}
+
+/**
+ * Laedt Tags strikt getrennt nach Kategorie:
+ * - statistics -> GA4 config
+ * - marketing  -> Google Ads config
+ */
+function applyScripts(consent) {
+  const wantsAnything = consent.statistics || (consent.marketing && ADS_ID);
+  if (!wantsAnything) return;
+
+  loadGtagLibrary(consent.statistics ? GA_ID : ADS_ID);
+  const gtag = ensureGtagStub();
+  updateConsentMode(consent);
+
+  if (consent.statistics && !window.__gaConfigured) {
+    gtag('config', GA_ID, { anonymize_ip: true });
+    window.__gaConfigured = true;
+  }
+
+  if (consent.marketing && ADS_ID && !window.__adsConfigured) {
+    gtag('config', ADS_ID);
+    window.__adsConfigured = true;
+  }
+}
+
+/** Tracking hart abschalten, Script-Tags entfernen, Cookies loeschen. */
+function revokeTracking() {
+  window[`ga-disable-${GA_ID}`] = true;
+  window.__gaConfigured = false;
+  window.__adsConfigured = false;
+
+  ['gtag-script', 'gtag-config'].forEach((id) => {
+    document.getElementById(id)?.remove();
+  });
+
+  const measurementId = GA_ID.replace(/^G-/, '');
+  const names = ['_ga', `_ga_${measurementId}`, '_gid', '_gcl_au', '_gcl_aw'];
+  const host = window.location.hostname;
+  const domains = ['', `; domain=${host}`, `; domain=.${host}`];
+
+  names.forEach((name) => {
+    domains.forEach((domain) => {
+      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${domain}`;
+    });
+  });
+}
+
+function readStoredConsent() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed.consent !== 'object' || !parsed.timestamp) return null;
+    if (parsed.version !== CONSENT_VERSION) return null;
+
+    const age = Date.now() - new Date(parsed.timestamp).getTime();
+    if (!Number.isFinite(age) || age > CONSENT_MAX_AGE_MS) return null;
+
+    return {
+      statistics: parsed.consent.statistics === true,
+      marketing: parsed.consent.marketing === true,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export default function Cookiebanner() {
   const [isVisible, setIsVisible] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
-  
-  // Granulare Auswahl (Punkt 4)
-  const [preferences, setPreferences] = useState({
-    statistics: false,
-    marketing: false
-  });
-
-  const TRACKING_ID = 'G-5GVE6GGBKS'; // Hier deine Google Analytics/Ads ID eintragen
+  const [preferences, setPreferences] = useState(EMPTY_CONSENT);
 
   useEffect(() => {
-    const savedData = localStorage.getItem('waermepumpen_consent');
-    
-    if (!savedData) {
-      setIsVisible(true);
+    setConsentDefaults();
+
+    const stored = readStoredConsent();
+    if (stored) {
+      setPreferences(stored);
+      if (!stored.statistics) window[`ga-disable-${GA_ID}`] = true;
+      applyScripts(stored);
     } else {
-      const parsed = JSON.parse(savedData);
-      
-      // Punkt 8: Nach ~12 Monaten (365 Tage) erneut abfragen
-      const ageInMs = Date.now() - new Date(parsed.timestamp).getTime();
-      const oneYearInMs = 365 * 24 * 60 * 60 * 1000;
-      
-      if (ageInMs > oneYearInMs) {
-        setIsVisible(true);
-      } else {
-        setPreferences(parsed.consent);
-        applyScripts(parsed.consent);
-      }
+      window[`ga-disable-${GA_ID}`] = true;
+      setIsVisible(true);
     }
 
-    // Punkt 6: Custom Event Listener, um Banner aus dem Footer zu öffnen
     const openBanner = () => {
-      setIsVisible(true);
+      setPreferences(readStoredConsent() || EMPTY_CONSENT);
       setShowSettings(true);
+      setIsVisible(true);
     };
     window.addEventListener('openCookieBanner', openBanner);
     return () => window.removeEventListener('openCookieBanner', openBanner);
   }, []);
 
-  const applyScripts = (consent) => {
-    // Analytics laden, falls zugestimmt
-    if (consent.statistics || consent.marketing) {
-      if (!document.getElementById('gtag-script')) {
-        const script = document.createElement('script');
-        script.id = 'gtag-script';
-        script.src = `https://www.googletagmanager.com/gtag/js?id=${TRACKING_ID}`;
-        script.async = true;
-        document.head.appendChild(script);
-
-        const scriptConfig = document.createElement('script');
-        scriptConfig.id = 'gtag-config';
-        scriptConfig.innerHTML = `
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '${TRACKING_ID}', { 
-            'anonymize_ip': true,
-            'allow_ad_personalization_signals': ${consent.marketing}
-          });
-        `;
-        document.head.appendChild(scriptConfig);
-      }
-    }
-  };
-
-  const removeCookiesAndTracking = () => {
-    // Punkt 10: Tracking hart deaktivieren und Cookies löschen
-    window[`ga-disable-${TRACKING_ID}`] = true;
-    
-    const cookiesToClear = ['_ga', `_ga_${TRACKING_ID}`, '_gcl_au', '_gid'];
-    cookiesToClear.forEach(name => {
-      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-      document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${window.location.hostname};`;
-    });
-  };
-
   const saveConsent = (newConsent) => {
-    const isUpdate = localStorage.getItem('waermepumpen_consent') !== null;
+    const previous = readStoredConsent();
+    const isRevocation =
+      previous &&
+      ((previous.statistics && !newConsent.statistics) ||
+        (previous.marketing && !newConsent.marketing));
 
-    // Punkt 8: Speicherung mit Timestamp und Version
-    const data = {
-      consent: newConsent,
-      timestamp: new Date().toISOString(),
-      version: "1.1" // Bei zukünftigen Textänderungen hochzählen
-    };
-    
-    localStorage.setItem('waermepumpen_consent', JSON.stringify(data));
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({
+        consent: newConsent,
+        timestamp: new Date().toISOString(),
+        version: CONSENT_VERSION,
+      })
+    );
+
     setPreferences(newConsent);
     setIsVisible(false);
+    setShowSettings(false);
 
-    if (isUpdate) {
-      // Wenn der User widerruft, Cookies hart löschen und Seite neu laden, 
-      // um alle laufenden JS-Instanzen im RAM zu killen.
-      removeCookiesAndTracking();
-      window.location.reload();
-    } else {
-      applyScripts(newConsent);
+    if (isRevocation) {
+      // Kein Full-Reload: der Rechner-State des Nutzers bleibt erhalten.
+      revokeTracking();
+      updateConsentMode(newConsent);
     }
+
+    if (newConsent.statistics) window[`ga-disable-${GA_ID}`] = false;
+    applyScripts(newConsent);
+    updateConsentMode(newConsent);
   };
 
-  const handleAcceptAll = () => saveConsent({ statistics: true, marketing: true });
-  const handleAcceptEssential = () => saveConsent({ statistics: false, marketing: false });
-  const handleSaveSettings = () => saveConsent(preferences);
+  const acceptAll = () => saveConsent({ statistics: true, marketing: !!ADS_ID });
+  const acceptEssential = () => saveConsent(EMPTY_CONSENT);
+  const saveSelection = () => saveConsent(preferences);
 
   if (!isVisible) return null;
 
   return (
-    <div className="custom-cookie-banner">
+    <div
+      className="custom-cookie-banner"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cookie-banner-title"
+    >
       <div className="cookie-content">
-        <h4>Ihre Privatsphäre ist uns wichtig</h4>
-        
-        {/* Punkt 9: Konkrete Nennung der Zwecke, Dienste und Drittlandtransfer */}
+        <h4 id="cookie-banner-title">Ihre Privatsphäre ist uns wichtig</h4>
+
         <p>
-          Wir nutzen Cookies und ähnliche Technologien, um den reibungslosen Betrieb unserer Website zu gewährleisten (Essenziell). 
-          Mit Ihrer Zustimmung verwenden wir <strong>Google Analytics</strong> zur statistischen Auswertung (Statistik) 
-          sowie <strong>Google Ads</strong> zur Erfolgsmessung unserer Werbekampagnen (Marketing). 
-          <br /><br />
-          Ihre Einwilligung umfasst auch die mögliche Datenübermittlung in die USA (Art. 49 Abs. 1 lit. a DSGVO), 
-          wo derzeit kein mit der EU vergleichbares Datenschutzniveau garantiert werden kann. 
-          Sie können diese Auswahl jederzeit über den Link "Cookie-Einstellungen" im Footer widerrufen.
-          <br /><br />
-          {/* Punkt 7: Verlinkungen direkt auf der ersten Ebene */}
-          Weitere Details finden Sie in unserer <Link to="/datenschutz" className="cookie-link">Datenschutzerklärung</Link> und im <Link to="/impressum" className="cookie-link">Impressum</Link>.
+          Wir nutzen Cookies und ähnliche Technologien, um den Betrieb unserer
+          Website zu gewährleisten (essenziell). Mit Ihrer Einwilligung setzen
+          wir zusätzlich <strong>Google Analytics</strong> zur statistischen
+          Auswertung ein
+          {ADS_ID && (
+            <>
+              {' '}sowie <strong>Google Ads</strong> zur Erfolgsmessung unserer
+              Werbekampagnen
+            </>
+          )}
+          .
+          <br />
+          <br />
+          Dabei können personenbezogene Daten an Google LLC in die USA
+          übermittelt werden. Google ist unter dem EU-US Data Privacy Framework
+          zertifiziert; Rechtsgrundlage ist Ihre Einwilligung nach Art. 6 Abs. 1
+          lit. a DSGVO, § 25 Abs. 1 TDDDG. Sie können Ihre Auswahl jederzeit mit
+          Wirkung für die Zukunft über „Cookie-Einstellungen“ im Footer ändern
+          oder widerrufen.
+          <br />
+          <br />
+          Weitere Details finden Sie in unserer{' '}
+          <Link to="/datenschutz" className="cookie-link">
+            Datenschutzerklärung
+          </Link>{' '}
+          und im{' '}
+          <Link to="/impressum" className="cookie-link">
+            Impressum
+          </Link>
+          .
         </p>
 
         {showSettings && (
           <div className="cookie-settings-panel">
             <label className="cookie-checkbox">
               <input type="checkbox" checked disabled />
-              <span><strong>Essenziell:</strong> Technisch notwendige Cookies zum Betrieb der Website.</span>
+              <span>
+                <strong>Essenziell:</strong> Technisch notwendige Cookies zum
+                Betrieb der Website. Immer aktiv.
+              </span>
             </label>
+
             <label className="cookie-checkbox">
-              <input 
-                type="checkbox" 
-                checked={preferences.statistics} 
-                onChange={(e) => setPreferences({...preferences, statistics: e.target.checked})} 
+              <input
+                type="checkbox"
+                checked={preferences.statistics}
+                onChange={(e) =>
+                  setPreferences((p) => ({ ...p, statistics: e.target.checked }))
+                }
               />
-              <span><strong>Statistik:</strong> Google Analytics zur pseudonymisierten Auswertung des Nutzerverhaltens.</span>
+              <span>
+                <strong>Statistik:</strong> Google Analytics zur
+                pseudonymisierten Auswertung des Nutzerverhaltens.
+              </span>
             </label>
-            <label className="cookie-checkbox">
-              <input 
-                type="checkbox" 
-                checked={preferences.marketing} 
-                onChange={(e) => setPreferences({...preferences, marketing: e.target.checked})} 
-              />
-              <span><strong>Marketing:</strong> Google Ads Conversion Tracking zur Erfolgsmessung von Werbeanzeigen.</span>
-            </label>
+
+            {ADS_ID && (
+              <label className="cookie-checkbox">
+                <input
+                  type="checkbox"
+                  checked={preferences.marketing}
+                  onChange={(e) =>
+                    setPreferences((p) => ({ ...p, marketing: e.target.checked }))
+                  }
+                />
+                <span>
+                  <strong>Marketing:</strong> Google Ads Conversion-Tracking zur
+                  Erfolgsmessung von Werbeanzeigen.
+                </span>
+              </label>
+            )}
           </div>
         )}
       </div>
 
       <div className="cookie-actions">
-        {/* Punkt 5: Gleichwertige Buttons ohne Dark Patterns */}
         <div className="cookie-buttons">
-          <button className="btn-cookie" onClick={handleAcceptEssential}>Nur Essenzielle</button>
+          <button type="button" className="btn-cookie" onClick={acceptEssential}>
+            Nur Essenzielle
+          </button>
           {showSettings ? (
-            <button className="btn-cookie" onClick={handleSaveSettings}>Auswahl speichern</button>
+            <button type="button" className="btn-cookie" onClick={saveSelection}>
+              Auswahl speichern
+            </button>
           ) : (
-            <button className="btn-cookie" onClick={() => setShowSettings(true)}>Einstellungen</button>
+            <button
+              type="button"
+              className="btn-cookie btn-cookie-secondary"
+              onClick={() => setShowSettings(true)}
+            >
+              Einstellungen
+            </button>
           )}
-          <button className="btn-cookie" onClick={handleAcceptAll}>Alle akzeptieren</button>
+          <button type="button" className="btn-cookie" onClick={acceptAll}>
+            Alle akzeptieren
+          </button>
         </div>
       </div>
     </div>
