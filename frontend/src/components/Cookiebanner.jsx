@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './styles/CookieBanner.css';
+import './styles/Cookiebanner.css';
 
 export default function CookieBanner() {
   const [isVisible, setIsVisible] = useState(false);
