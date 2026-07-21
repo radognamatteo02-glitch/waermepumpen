@@ -1,5 +1,5 @@
 import React from 'react';
-import CookieBanner from './components/CookieBanner';
+import CookieBanner from './components/Cookiebanner';
 import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';

@@ -2,7 +2,11 @@
    Bindet optional die Google Fonts "Sora" und "Inter" ein.
    Falls dein Projekt Fonts anders lädt, kannst du die nächste Zeile entfernen
    und die Fonts stattdessen global (z. B. in index.html) einbinden. */
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@400;500&display=swap');
+@import '@fontsource/sora/400.css';
+@import '@fontsource/sora/600.css';
+@import '@fontsource/sora/700.css';
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
 
 .wp-montage {
   --wp-cream: #F6F2E9;

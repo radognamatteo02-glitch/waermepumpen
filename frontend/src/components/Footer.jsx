@@ -1,6 +1,11 @@
 import { Link } from 'react-router-dom';
 
 export default function Footer() {
+  const openCookieSettings = (e) => {
+    e.preventDefault();
+    window.dispatchEvent(new Event('openCookieBanner'));
+  };
+
   return (
     <footer id="kontakt" className="footer">
       <div className="container">
@@ -8,9 +13,12 @@ export default function Footer() {
           {/* ... andere Footer-Spalten ... */}
           <div>
             <h4>Rechtliches</h4>
-            {/* WICHTIG: Link statt a verwenden */}
             <Link to="/impressum">Impressum</Link>
             <Link to="/datenschutz">Datenschutzerklärung</Link>
+            {/* Punkt 6: Link zum Öffnen des Banners für Widerruf */}
+            <a href="#" onClick={openCookieSettings} style={{ cursor: 'pointer' }}>
+              Cookie-Einstellungen
+            </a>
           </div>
         </div>
         <div className="footer-bottom">
