@@ -2,20 +2,39 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './styles/Cookiebanner.css';
 
-// Google Analytics 4 Measurement ID
-const GA_ID = 'G-5GVE6GGBKS';
-// Google Ads Conversion ID -- auf die echte ID setzen oder auf null lassen,
-// dann wird die Marketing-Kategorie automatisch ausgeblendet.
-const ADS_ID = null; // z. B. 'AW-123456789'
+/**
+ * Voraussetzung in index.html (VOR dem GTM-Snippet):
+ *
+ *   <script>
+ *     window.dataLayer = window.dataLayer || [];
+ *     function gtag(){dataLayer.push(arguments);}
+ *     gtag('consent', 'default', {
+ *       ad_storage: 'denied', ad_user_data: 'denied',
+ *       ad_personalization: 'denied', analytics_storage: 'denied',
+ *       functionality_storage: 'granted', security_storage: 'granted',
+ *       wait_for_update: 500
+ *     });
+ *   </script>
+ *
+ * Ohne diesen Block feuert GTM Tags vor der Einwilligung.
+ * Das <noscript>-iframe von GTM muss aus dem <body> entfernt werden.
+ *
+ * Im GTM-Container zusaetzlich pro Tag die zusaetzliche Einwilligungspruefung
+ * setzen (analytics_storage fuer GA4, ad_storage + ad_user_data fuer Ads).
+ */
 
+const GA_ID = 'G-5GVE6GGBKS';        // nur fuer den ga-disable Fallback
 const STORAGE_KEY = 'waermepumpen_consent';
-const CONSENT_VERSION = '1.2'; // bei Textaenderungen hochzaehlen -> erneute Abfrage
+const CONSENT_VERSION = '2.0';        // GTM-Umstellung -> erneute Abfrage
 const CONSENT_MAX_AGE_MS = 365 * 24 * 60 * 60 * 1000;
+
+// Marketing-Kategorie erst anzeigen, wenn im GTM-Container tatsaechlich
+// Ads-/Remarketing-Tags konfiguriert sind.
+const HAS_MARKETING_TAGS = false;
 
 const EMPTY_CONSENT = { statistics: false, marketing: false };
 
-/** gtag-Stub, damit consent-Befehle auch vor dem Laden der Bibliothek greifen. */
-function ensureGtagStub() {
+function ensureGtag() {
   window.dataLayer = window.dataLayer || [];
   if (typeof window.gtag !== 'function') {
     window.gtag = function gtag() {
@@ -25,78 +44,32 @@ function ensureGtagStub() {
   return window.gtag;
 }
 
-/** Consent Mode v2: vor jedem Tag-Laden auf "denied" setzen. */
-function setConsentDefaults() {
-  const gtag = ensureGtagStub();
-  gtag('consent', 'default', {
-    ad_storage: 'denied',
-    ad_user_data: 'denied',
-    ad_personalization: 'denied',
-    analytics_storage: 'denied',
-    functionality_storage: 'granted',
-    security_storage: 'granted',
-    wait_for_update: 500,
-  });
-}
+/** Consent-Signal an GTM. Der Container entscheidet, welche Tags feuern. */
+function pushConsent(consent) {
+  const gtag = ensureGtag();
 
-function updateConsentMode(consent) {
-  const gtag = ensureGtagStub();
   gtag('consent', 'update', {
     ad_storage: consent.marketing ? 'granted' : 'denied',
     ad_user_data: consent.marketing ? 'granted' : 'denied',
     ad_personalization: consent.marketing ? 'granted' : 'denied',
     analytics_storage: consent.statistics ? 'granted' : 'denied',
   });
-}
 
-function loadGtagLibrary(primaryId) {
-  if (document.getElementById('gtag-script')) return;
-  const script = document.createElement('script');
-  script.id = 'gtag-script';
-  script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${primaryId}`;
-  document.head.appendChild(script);
+  // Fallback, falls im Container ein GA4-Tag ohne Consent-Pruefung haengt.
+  window[`ga-disable-${GA_ID}`] = !consent.statistics;
 
-  const gtag = ensureGtagStub();
-  gtag('js', new Date());
-}
-
-/**
- * Laedt Tags strikt getrennt nach Kategorie:
- * - statistics -> GA4 config
- * - marketing  -> Google Ads config
- */
-function applyScripts(consent) {
-  const wantsAnything = consent.statistics || (consent.marketing && ADS_ID);
-  if (!wantsAnything) return;
-
-  loadGtagLibrary(consent.statistics ? GA_ID : ADS_ID);
-  const gtag = ensureGtagStub();
-  updateConsentMode(consent);
-
-  if (consent.statistics && !window.__gaConfigured) {
-    gtag('config', GA_ID, { anonymize_ip: true });
-    window.__gaConfigured = true;
-  }
-
-  if (consent.marketing && ADS_ID && !window.__adsConfigured) {
-    gtag('config', ADS_ID);
-    window.__adsConfigured = true;
-  }
-}
-
-/** Tracking hart abschalten, Script-Tags entfernen, Cookies loeschen. */
-function revokeTracking() {
-  window[`ga-disable-${GA_ID}`] = true;
-  window.__gaConfigured = false;
-  window.__adsConfigured = false;
-
-  ['gtag-script', 'gtag-config'].forEach((id) => {
-    document.getElementById(id)?.remove();
+  // Eigenes Event fuer Trigger im Container.
+  window.dataLayer.push({
+    event: 'consent_update',
+    consent_statistics: consent.statistics,
+    consent_marketing: consent.marketing,
   });
+}
 
+/** Bei Widerruf: gesetzte Cookies aktiv entfernen. */
+function clearTrackingCookies() {
   const measurementId = GA_ID.replace(/^G-/, '');
-  const names = ['_ga', `_ga_${measurementId}`, '_gid', '_gcl_au', '_gcl_aw'];
+  const names = ['_ga', `_ga_${measurementId}`, '_gid', '_gcl_au', '_gcl_aw', '_gac_gb'];
   const host = window.location.hostname;
   const domains = ['', `; domain=${host}`, `; domain=.${host}`];
 
@@ -134,14 +107,13 @@ export default function Cookiebanner() {
   const [preferences, setPreferences] = useState(EMPTY_CONSENT);
 
   useEffect(() => {
-    setConsentDefaults();
-
     const stored = readStoredConsent();
+
     if (stored) {
       setPreferences(stored);
-      if (!stored.statistics) window[`ga-disable-${GA_ID}`] = true;
-      applyScripts(stored);
+      pushConsent(stored);
     } else {
+      // Kein gueltiger Consent: Defaults aus index.html bleiben auf denied.
       window[`ga-disable-${GA_ID}`] = true;
       setIsVisible(true);
     }
@@ -175,18 +147,12 @@ export default function Cookiebanner() {
     setIsVisible(false);
     setShowSettings(false);
 
-    if (isRevocation) {
-      // Kein Full-Reload: der Rechner-State des Nutzers bleibt erhalten.
-      revokeTracking();
-      updateConsentMode(newConsent);
-    }
-
-    if (newConsent.statistics) window[`ga-disable-${GA_ID}`] = false;
-    applyScripts(newConsent);
-    updateConsentMode(newConsent);
+    pushConsent(newConsent);
+    if (isRevocation) clearTrackingCookies();
   };
 
-  const acceptAll = () => saveConsent({ statistics: true, marketing: !!ADS_ID });
+  const acceptAll = () =>
+    saveConsent({ statistics: true, marketing: HAS_MARKETING_TAGS });
   const acceptEssential = () => saveConsent(EMPTY_CONSENT);
   const saveSelection = () => saveConsent(preferences);
 
@@ -205,9 +171,9 @@ export default function Cookiebanner() {
         <p>
           Wir nutzen Cookies und ähnliche Technologien, um den Betrieb unserer
           Website zu gewährleisten (essenziell). Mit Ihrer Einwilligung setzen
-          wir zusätzlich <strong>Google Analytics</strong> zur statistischen
-          Auswertung ein
-          {ADS_ID && (
+          wir über den <strong>Google Tag Manager</strong> zusätzlich{' '}
+          <strong>Google Analytics</strong> zur statistischen Auswertung ein
+          {HAS_MARKETING_TAGS && (
             <>
               {' '}sowie <strong>Google Ads</strong> zur Erfolgsmessung unserer
               Werbekampagnen
@@ -216,12 +182,12 @@ export default function Cookiebanner() {
           .
           <br />
           <br />
-          Dabei können personenbezogene Daten an Google LLC in die USA
-          übermittelt werden. Google ist unter dem EU-US Data Privacy Framework
-          zertifiziert; Rechtsgrundlage ist Ihre Einwilligung nach Art. 6 Abs. 1
-          lit. a DSGVO, § 25 Abs. 1 TDDDG. Sie können Ihre Auswahl jederzeit mit
-          Wirkung für die Zukunft über „Cookie-Einstellungen“ im Footer ändern
-          oder widerrufen.
+          Dabei können personenbezogene Daten an Google Ireland Ltd. und Google
+          LLC in die USA übermittelt werden. Google LLC ist unter dem EU-US Data
+          Privacy Framework zertifiziert. Rechtsgrundlage ist Ihre Einwilligung
+          nach Art. 6 Abs. 1 lit. a DSGVO, § 25 Abs. 1 TDDDG. Sie können Ihre
+          Auswahl jederzeit mit Wirkung für die Zukunft über
+          „Cookie-Einstellungen“ im Footer ändern oder widerrufen.
           <br />
           <br />
           Weitere Details finden Sie in unserer{' '}
@@ -259,7 +225,7 @@ export default function Cookiebanner() {
               </span>
             </label>
 
-            {ADS_ID && (
+            {HAS_MARKETING_TAGS && (
               <label className="cookie-checkbox">
                 <input
                   type="checkbox"

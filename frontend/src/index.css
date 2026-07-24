@@ -140,7 +140,7 @@ label { font-weight: 600; font-size: 15px; display: block; }
 
 /* Selection Cards */
 .options-grid { display: flex; flex-wrap: wrap; gap: 10px; }
-.option-card { background: #fff; border: 1.5px solid var(--border); border-radius: 12px; padding: 14px 13px; cursor: pointer; flex: 1 1 140px; transition: 0.2s; }
+.option-card { background: #fff; border: 1.5px solid var(--border); border-radius: 12px; padding: 14px 13px; cursor: pointer; flex: 1 1 140px; transition: 0.2s; margin-top: 10px; margin-bottom: 10px;}
 .option-card.sm { flex: 1 1 90px; text-align: center; }
 .option-card.list-item { width: 100%; display: flex; align-items: center; justify-content: space-between; }
 .option-card.active { background: #e8ece1; border-color: var(--primary); }
@@ -308,7 +308,7 @@ label { font-weight: 600; font-size: 15px; display: block; }
 .faq-icon { font-size: 24px; font-weight: 300; transition: transform 0.3s; color: #8a9389; }
 .faq-item.active .faq-icon { transform: rotate(45deg); }
 .faq-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; color: var(--text-muted); }
-.faq-item.active .faq-content { max-height: 300px; }
+.faq-item.active .faq-content { max-height: 300px; padding-bottom: 15px;}
 
 /* Footer */
 .footer { background: #162419; color: #F3EEE4; padding: 56px 0 30px; }

@@ -206,7 +206,7 @@ export default function Home({ step, setStep, calcState, setCalcState, formData,
                   </div>
                   
                   <div className="result-highlight">
-                    <span>Rund {results.sparProzent} % weniger Heizkosten pro Jahr</span>
+                    <span>Rund {results.ersparnisProzent} % weniger Heizkosten pro Jahr</span>
                   </div>
                   
                   <div className="result-grid">
@@ -218,9 +218,9 @@ export default function Home({ step, setStep, calcState, setCalcState, formData,
                       <div className="res-label">Ersparnis in %</div>
                       <div className="res-val green">{results.ersparnisProzent} %</div>
                     </div>
-                    <div className="res-card" style={{ gridColumn: "1 / -1" }}>
+                    <div className="res-card">
                       <div className="res-label">Förderung</div>
-                      <div className="res-val">70 %</div>
+                      <div className="res-val">bis zu 80 %</div>
                     </div>
                   </div>
                   

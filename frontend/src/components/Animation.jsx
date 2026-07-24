@@ -29,7 +29,7 @@ const STEPS = [
   { id: 'pDeckel', label: 'Obere Abdeckung', cx: 460, cy: 114 },
 ];
 
-const STEP_MS = 560;
+const STEP_MS = 1500;
 const REPEAT_DELAY_MS = 3000; // Pause vor dem Neustart (3 Sekunden)
 
 export default function WaermepumpeAnimation() {

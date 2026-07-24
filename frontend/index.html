@@ -1,15 +1,39 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de"></html>
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.png" />
+
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('consent', 'default', {
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        analytics_storage: 'denied',
+        functionality_storage: 'granted',
+        security_storage: 'granted',
+        wait_for_update: 500
+      });
+    </script>
+
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-TM3QQNN5');</script>
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Wärmekompass</title>
-    <!-- <script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="085d4512-7c9e-4aaa-a869-374fd3727254" data-blockingmode="auto" type="text/javascript"></script> -->
-
   </head>
+
   <body>
+
+
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
+
+
